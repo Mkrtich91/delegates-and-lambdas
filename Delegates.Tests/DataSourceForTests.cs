@@ -4,7 +4,9 @@ using NUnit.Framework;
 
 namespace Delegates.Tests
 {
+#pragma warning disable S1118
     internal class DataSourceForTests
+#pragma warning restore S1118
     {
         internal const double Accuracy = 10E-6;
 

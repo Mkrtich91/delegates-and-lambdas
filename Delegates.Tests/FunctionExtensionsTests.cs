@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using static Delegates.FunctionExtensions;
@@ -24,10 +24,12 @@ namespace Delegates.Tests
             int count,
             List<double> expected)
         {
+#pragma warning disable S3358
             CollectionAssert.AreEqual(expected, GenerateProgression(first, formula, count), Comparer<double>.Create(
                 (x, y) => (Math.Abs(y - x) > DataSourceForTests.Accuracy)
                     ? 1
                     : ((Math.Abs(x - y) > DataSourceForTests.Accuracy) ? -1 : 0)));
+#pragma warning restore S3358
         }
 
         [Test]
@@ -62,10 +64,12 @@ namespace Delegates.Tests
             Func<double, double> formula, Predicate<double> finished,
             List<double> expected)
         {
+#pragma warning disable S3358
             CollectionAssert.AreEqual(expected, GenerateProgression(first, formula, finished), Comparer<double>.Create(
                 (x, y) => (Math.Abs(y - x) > DataSourceForTests.Accuracy)
                     ? 1
                     : ((Math.Abs(x - y) > DataSourceForTests.Accuracy) ? -1 : 0)));
+#pragma warning restore S3358
         }
 
         [Test]
@@ -122,11 +126,13 @@ namespace Delegates.Tests
             Func<double, double, double> formula, int count,
             List<double> expected)
         {
+#pragma warning disable S3358
             CollectionAssert.AreEqual(expected, GenerateSequence(1, 2, formula, count),
                 Comparer<double>.Create((x, y) =>
                     (Math.Abs(y - x) > DataSourceForTests.Accuracy)
                         ? 1
                         : ((Math.Abs(x - y) > DataSourceForTests.Accuracy) ? -1 : 0)));
+#pragma warning restore S3358
         }
 
         [Test]

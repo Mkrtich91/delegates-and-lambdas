@@ -27,18 +27,28 @@ namespace Delegates
         /// <returns>A sequence of the elements of type T.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Throw when <paramref name="count"/> is less than or equal to 0.</exception>
         /// <exception cref="ArgumentNullException">Throw when <paramref name="formula"/> is null.</exception>        
+#pragma warning disable S4136
         public static IEnumerable<T> GenerateProgression<T>(T first, Func<T, T>? formula, int count)
+#pragma warning restore S4136
         {
-            //TODO: Add validation logic here.
+            if (count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
 
-            return GeneratorCore();
+            if (formula == null)
+                throw new ArgumentNullException(nameof(formula), "Formula cannot be null.");
 
-            IEnumerable<T> GeneratorCore()
-            {
-                throw new NotImplementedException();
-            }
+            return GeneratorCore(first, formula, count);
         }
 
+        private static IEnumerable<T> GeneratorCore<T>(T first, Func<T, T> formula, int count)
+        {
+            T current = first;
+            for (int i = 0; i < count; i++)
+            {
+                yield return current;
+                current = formula(current);
+            }
+        }
         /// <summary>
         /// Generates a sequence of the elements of type T using the following recurrent formula:
         /// x_(n+1) = f(x_(n)), n = 1, 2, ...,  where x_1 - initial value.
@@ -60,15 +70,34 @@ namespace Delegates
         /// <exception cref="ArgumentNullException">Throw when <paramref name="finished"/> is null.</exception>        
         public static IEnumerable<T> GenerateProgression<T>(T first, Func<T, T>? formula, Predicate<T>? finished)
         {
-            //TODO: Add validation logic here.
+            if (formula is null)
+            {
+                throw new ArgumentNullException(nameof(formula));
+            }
+
+            if (finished is null)
+            {
+                throw new ArgumentNullException(nameof(finished));
+            }
 
             return GeneratorCore();
 
             IEnumerable<T> GeneratorCore()
             {
-                throw new NotImplementedException();
+                T current = first;
+                int count = 0;
+
+                do
+                {
+                    yield return current;
+                    current = formula(current);
+                    count++;
+
+                }
+                while (!finished(current));
             }
         }
+    
 
         /// <summary>
         /// Generates a `n`s element of the sequence using the following recurrent formula:
@@ -90,9 +119,25 @@ namespace Delegates
         /// <exception cref="ArgumentNullException">Throw when <paramref name="formula"/> is null.</exception>        
         public static T GetElement<T>(T first, Func<T, T>? formula, int number)
         {
-            throw new NotImplementedException();
-        }
+            if (number <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(number), "Number must be greater than 0.");
+            }
 
+            if (formula is null)
+            {
+                throw new ArgumentNullException(nameof(formula));
+            }
+
+            // Calculate the n-th element of the sequence
+            T current = first;
+            for (int i = 1; i < number; i++)
+            {
+                current = formula(current);
+            }
+
+            return current;
+        }
         /// <summary>
         /// Calculates a value as a composition of sequentially executed binary operation
         /// on the elements of the sequence by the rule:
@@ -115,7 +160,38 @@ namespace Delegates
         /// <exception cref="ArgumentOutOfRangeException">Throw when <paramref name="count"/> is less than or equal to 0.</exception>
         public static T Calculate<T>(T first, Func<T, T>? formula, Func<T, T, T>? operation, int count)
         {
-            throw new NotImplementedException();
+            if (formula is null)
+            {
+                throw new ArgumentNullException(nameof(formula));
+            }
+
+            if (operation is null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            if (count <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
+            }
+
+            T[] sequence = new T[count];
+            T current = first;
+            sequence[0] = current;
+
+            for (int i = 1; i < count; i++)
+            {
+                current = formula(current);
+                sequence[i] = current;
+            }
+
+            T value = sequence[0];
+            for (int i = 1; i < count; i++)
+            {
+                value = operation(value, sequence[i]);
+            }
+
+            return value;
         }
 
         /// <summary>
@@ -133,16 +209,35 @@ namespace Delegates
         /// <exception cref="ArgumentNullException">Throw when <paramref name="formula"/> is null.</exception>
         public static IEnumerable<T> GenerateSequence<T>(T first, T second, Func<T, T, T>? formula, int count)
         {
-            //TODO: Add validation logic here.
+            if (count <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
+            }
+
+            if (formula is null)
+            {
+                throw new ArgumentNullException(nameof(formula));
+            }
 
             return GeneratorCore();
 
             IEnumerable<T> GeneratorCore()
             {
-                throw new NotImplementedException();
+                T prev = first;
+                T current = second;
+
+                yield return prev;
+                yield return current;
+
+                for (int i = 2; i < count; i++)
+                {
+                    T next = formula(prev, current);
+                    yield return next;
+                    prev = current;
+                    current = next;
+                }
             }
         }
-
         /// <summary>
         /// Combines several predicates using logical AND operator.
         /// </summary>
@@ -164,9 +259,24 @@ namespace Delegates
         /// </example>
         public static Predicate<T> CombinePredicates<T>(params Predicate<T>[]? predicates)
         {
-            throw new NotImplementedException();
+            if (predicates is null)
+            {
+                throw new ArgumentNullException(nameof(predicates));
+            }
+
+            // Return a new predicate that combines all the predicates using the AND operator
+            return x =>
+            {
+                foreach (var predicate in predicates)
+                {
+                    if (!predicate(x))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            };
         }
-        
         /// <summary>
         /// Finds maximum from two elements according to comparer logic.
         /// If elements are equal returns <paramref name="lhs"/>.
@@ -179,7 +289,14 @@ namespace Delegates
         /// <exception cref="ArgumentNullException">Thrown when comparer is null.</exception>
         public static T FindMax<T>(T lhs, T rhs, Comparison<T>? comparer)
         {
-            throw new NotImplementedException();
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(nameof(comparer));
+            }
+
+            int comparisonResult = comparer(lhs, rhs);
+
+            return comparisonResult >= 0 ? lhs : rhs;
         }
     }
 }
